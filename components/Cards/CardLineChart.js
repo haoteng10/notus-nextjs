@@ -1,30 +1,32 @@
-import React from "react";
-import Chart from "chart.js";
+import React, { useEffect, useRef } from "react";
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
 
 export default function CardLineChart() {
-  React.useEffect(() => {
-    var config = {
+  const chartRef = useRef(null);
+  const chartInstance = useRef(null);
+
+  useEffect(() => {
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+    }
+
+    const ctx = chartRef.current.getContext("2d");
+
+    chartInstance.current = new Chart(ctx, {
       type: "line",
       data: {
-        labels: [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-        ],
+        labels: ["January", "February", "March", "April", "May", "June", "July"],
         datasets: [
           {
-            label: new Date().getFullYear(),
+            label: new Date().getFullYear().toString(),
             backgroundColor: "#4c51bf",
             borderColor: "#4c51bf",
             data: [65, 78, 66, 44, 56, 67, 75],
             fill: false,
           },
           {
-            label: new Date().getFullYear() - 1,
+            label: (new Date().getFullYear() - 1).toString(),
             fill: false,
             backgroundColor: "#fff",
             borderColor: "#fff",
@@ -102,10 +104,15 @@ export default function CardLineChart() {
           ],
         },
       },
+    });
+
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
     };
-    var ctx = document.getElementById("line-chart").getContext("2d");
-    window.myLine = new Chart(ctx, config);
   }, []);
+
   return (
     <>
       <div className="relative flex flex-col min-w-0 break-words w-full mb-6 shadow-lg rounded bg-blueGray-700">
@@ -122,7 +129,7 @@ export default function CardLineChart() {
         <div className="p-4 flex-auto">
           {/* Chart */}
           <div className="relative h-350-px">
-            <canvas id="line-chart"></canvas>
+            <canvas ref={chartRef}></canvas>
           </div>
         </div>
       </div>

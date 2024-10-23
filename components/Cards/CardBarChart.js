@@ -1,23 +1,25 @@
-import React from "react";
-import Chart from "chart.js";
+import React, { useEffect, useRef } from "react";
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
 
 export default function CardBarChart() {
-  React.useEffect(() => {
-    let config = {
+  const chartRef = useRef(null);
+  const chartInstance = useRef(null);
+
+  useEffect(() => {
+    if (chartInstance.current) {
+      chartInstance.current.destroy();
+    }
+
+    const ctx = chartRef.current.getContext("2d");
+
+    chartInstance.current = new Chart(ctx, {
       type: "bar",
       data: {
-        labels: [
-          "January",
-          "February",
-          "March",
-          "April",
-          "May",
-          "June",
-          "July",
-        ],
+        labels: ["January", "February", "March", "April", "May", "June", "July"],
         datasets: [
           {
-            label: new Date().getFullYear(),
+            label: new Date().getFullYear().toString(),
             backgroundColor: "#ed64a6",
             borderColor: "#ed64a6",
             data: [30, 78, 56, 34, 100, 45, 13],
@@ -25,7 +27,7 @@ export default function CardBarChart() {
             barThickness: 8,
           },
           {
-            label: new Date().getFullYear() - 1,
+            label: (new Date().getFullYear() - 1).toString(),
             fill: false,
             backgroundColor: "#4c51bf",
             borderColor: "#4c51bf",
@@ -94,10 +96,15 @@ export default function CardBarChart() {
           ],
         },
       },
+    });
+
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
     };
-    let ctx = document.getElementById("bar-chart").getContext("2d");
-    window.myBar = new Chart(ctx, config);
   }, []);
+
   return (
     <>
       <div className="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
@@ -116,7 +123,7 @@ export default function CardBarChart() {
         <div className="p-4 flex-auto">
           {/* Chart */}
           <div className="relative h-350-px">
-            <canvas id="bar-chart"></canvas>
+            <canvas ref={chartRef}></canvas>
           </div>
         </div>
       </div>
